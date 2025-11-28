@@ -4,9 +4,9 @@ spring:
 
   # ==================== DATASOURCE ====================
   datasource:
-    url: jdbc:postgresql://localhost:5432/db_camarao
+    url: jdbc:postgresql://localhost:5432/db_shrimp_farm
     username: postgres
-    password: admin123
+    password: postgres
     driver-class-name: org.postgresql.Driver
     hikari:
       connection-timeout: 20000
