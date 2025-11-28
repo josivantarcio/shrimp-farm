@@ -1,90 +1,46 @@
-spring:
-  application:
-    name: shrimp-farm
+  spring:
+    application:
+      name: shrimp-farm
 
-  # ==================== DATASOURCE ====================
-  datasource:
-    url: jdbc:postgresql://localhost:5432/db_shrimp_farm
-    username: postgres
-    password: postgres
-    driver-class-name: org.postgresql.Driver
-    hikari:
-      connection-timeout: 20000
-      maximum-pool-size: 10
-      minimum-idle: 5
-      idle-timeout: 300000
-      max-lifetime: 1200000
+    datasource:
+      url: jdbc:postgresql://localhost:5433/db_shrimp_farm
+      username: postgres
+      password: postgres
+      driver-class-name: org.postgresql.Driver
 
-  # ==================== JPA / HIBERNATE ====================
-  jpa:
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
-    hibernate:
-      ddl-auto: validate
-    show-sql: false
-    properties:
+    jpa:
+      database-platform: org.hibernate.dialect.PostgreSQLDialect
       hibernate:
-        format_sql: true
-        use_sql_comments: true
-        jdbc:
-          time_zone: America/Fortaleza
+        ddl-auto: validate
+      show-sql: false
+      properties:
+        hibernate:
+          format_sql: true
 
-  # ==================== FLYWAY ====================
-  flyway:
-    enabled: true
-    baseline-on-migrate: true
-    locations: classpath:db/migration
-    baseline-version: 0
-    validate-on-migrate: true
+    flyway:
+      enabled: true
+      baseline-on-migrate: true
+      locations: classpath:db/migration
+      baseline-version: 0
 
-  # ==================== SECURITY ====================
-  security:
-    user:
-      name: admin
-      password: admin123
+  server:
+    port: 8080
+    servlet:
+      context-path: /api
 
-# ==================== SERVER ====================
-server:
-  port: 8080
-  servlet:
-    context-path: /api
-  error:
-    include-message: always
-    include-binding-errors: always
-    include-stacktrace: on_param
-    include-exception: false
+  logging:
+    level:
+      root: INFO
+      com.jtarcio.shrimpfarm: DEBUG
 
-# ==================== LOGGING ====================
-logging:
-  level:
-    root: INFO
-    com.jtarcio.shrimpfarm: DEBUG
-    org.springframework.web: DEBUG
-    org.springframework.security: DEBUG
-    org.hibernate.SQL: DEBUG
-    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
-  pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} - %logger{36} - %msg%n"
-    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  springdoc:
+    api-docs:
+      path: /v3/api-docs
+    swagger-ui:
+      path: /swagger-ui.html
+      enabled: true
 
-# ==================== SPRINGDOC / SWAGGER ====================
-springdoc:
-  api-docs:
-    path: /v3/api-docs
-  swagger-ui:
-    path: /swagger-ui.html
-    enabled: true
-    operations-sorter: method
-    tags-sorter: alpha
-    disable-swagger-default-url: true
+  jwt:
+    secret: Y29tLmp0YXJjaW8uc2hyaW1wZmFybS5zZWNyZXQua2V5LnNlY3VyZS4yMDI1
+    expiration: 86400000
 
-# ==================== JWT ====================
-jwt:
-  secret: Y29tLmp0YXJjaW8uc2hyaW1wZmFybS5zZWNyZXQua2V5LnNlY3VyZS4yMDI1
-  expiration: 86400000 # 24 horas em milissegundos
-  refresh-expiration: 604800000 # 7 dias em milissegundos
-
-# ==================== APLICAÇÃO ====================
-app:
-  name: Shrimp Farm Management System
-  version: 0.0.1-SNAPSHOT
-  timezone: America/Fortaleza
