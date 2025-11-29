@@ -1,6 +1,10 @@
 package com.jtarcio.shrimpfarm.application.service;
 
+import com.jtarcio.shrimpfarm.domain.entity.Biometria;
+import com.jtarcio.shrimpfarm.domain.entity.CustoVariavel;
 import com.jtarcio.shrimpfarm.domain.entity.Lote;
+import com.jtarcio.shrimpfarm.domain.enums.CategoriaGastoEnum;
+import com.jtarcio.shrimpfarm.domain.enums.CriterioRateioEnergia;
 import com.jtarcio.shrimpfarm.domain.exception.EntityNotFoundException;
 import com.jtarcio.shrimpfarm.infrastructure.persistence.*;
 import lombok.RequiredArgsConstructor;
@@ -10,8 +14,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +30,7 @@ public class CalculadoraCustoService {
     private final NutrienteRepository nutrienteRepository;
     private final FertilizacaoRepository fertilizacaoRepository;
     private final CustoVariavelRepository custoVariavelRepository;
+    private final BiometriaRepository biometriaRepository;
 
     /**
      * Calcula todos os custos de um lote
@@ -246,4 +254,179 @@ public class CalculadoraCustoService {
 
         return resultado;
     }
+
+    /**
+     * Calcula o rateio de energia elétrica por lote em um período
+     *
+     * @param custoTotalEnergia Custo total de energia no período
+     * @param lotesIds          IDs dos lotes ativos no período
+     * @param criterioRateio    DIAS_CULTIVO, BIOMASSA ou IGUALITARIO
+     * @return Map com loteId -> valor rateado
+     */
+    @Transactional(readOnly = true)
+    public Map<Long, BigDecimal> ratearEnergiaPorPeriodo(
+            BigDecimal custoTotalEnergia,
+            List<Long> lotesIds,
+            CriterioRateioEnergia criterioRateio) {
+
+        log.info("Rateando energia de R$ {} para {} lotes (critério: {})",
+                custoTotalEnergia, lotesIds.size(), criterioRateio);
+
+        if (lotesIds.isEmpty() || custoTotalEnergia.compareTo(BigDecimal.ZERO) == 0) {
+            return new HashMap<>();
+        }
+
+        switch (criterioRateio) {
+            case DIAS_CULTIVO:
+                return ratearPorDiasCultivo(custoTotalEnergia, lotesIds);
+            case BIOMASSA:
+                return ratearPorBiomassa(custoTotalEnergia, lotesIds);
+            case IGUALITARIO:
+                return ratearIgualitariamente(custoTotalEnergia, lotesIds);
+            default:
+                throw new IllegalArgumentException("Critério de rateio inválido: " + criterioRateio);
+        }
+    }
+
+    /**
+     * Rateio proporcional aos dias de cultivo
+     */
+    private Map<Long, BigDecimal> ratearPorDiasCultivo(BigDecimal custoTotal, List<Long> lotesIds) {
+        Map<Long, BigDecimal> resultado = new HashMap<>();
+
+        // Calcular total de dias de todos os lotes
+        Map<Long, Integer> diasPorLote = new HashMap<>();
+        int totalDias = 0;
+
+        for (Long loteId : lotesIds) {
+            Lote lote = loteRepository.findById(loteId)
+                    .orElseThrow(() -> new EntityNotFoundException("Lote", loteId));
+
+            Integer dias = lote.getDiasCultivo();
+            diasPorLote.put(loteId, dias);
+            totalDias += dias;
+        }
+
+        // Ratear proporcionalmente
+        for (Map.Entry<Long, Integer> entry : diasPorLote.entrySet()) {
+            Long loteId = entry.getKey();
+            Integer dias = entry.getValue();
+
+            BigDecimal proporcao = BigDecimal.valueOf(dias)
+                    .divide(BigDecimal.valueOf(totalDias), 6, RoundingMode.HALF_UP);
+
+            BigDecimal valorRateado = custoTotal.multiply(proporcao)
+                    .setScale(2, RoundingMode.HALF_UP);
+
+            resultado.put(loteId, valorRateado);
+        }
+
+        log.info("Rateio por dias concluído. Total de dias: {}", totalDias);
+        return resultado;
+    }
+
+    /**
+     * Rateio proporcional à biomassa estimada
+     */
+    private Map<Long, BigDecimal> ratearPorBiomassa(BigDecimal custoTotal, List<Long> lotesIds) {
+        Map<Long, BigDecimal> resultado = new HashMap<>();
+
+        // Calcular biomassa total de todos os lotes
+        Map<Long, BigDecimal> biomassaPorLote = new HashMap<>();
+        BigDecimal biomasTotal = BigDecimal.ZERO;
+
+        for (Long loteId : lotesIds) {
+            Optional<Biometria> ultimaBiometria = biometriaRepository
+                    .findUltimaBiometriaByLoteId(loteId);
+
+            if (ultimaBiometria.isPresent()) {
+                BigDecimal biomassa = ultimaBiometria.get().getBiomassaEstimada();
+                if (biomassa != null) {
+                    biomassaPorLote.put(loteId, biomassa);
+                    biomasTotal = biomasTotal.add(biomassa);
+                }
+            }
+        }
+
+        if (biomasTotal.compareTo(BigDecimal.ZERO) == 0) {
+            log.warn("Biomassa total é zero, usando rateio igualitário");
+            return ratearIgualitariamente(custoTotal, lotesIds);
+        }
+
+        // Ratear proporcionalmente
+        for (Map.Entry<Long, BigDecimal> entry : biomassaPorLote.entrySet()) {
+            Long loteId = entry.getKey();
+            BigDecimal biomassa = entry.getValue();
+
+            BigDecimal proporcao = biomassa.divide(biomasTotal, 6, RoundingMode.HALF_UP);
+            BigDecimal valorRateado = custoTotal.multiply(proporcao)
+                    .setScale(2, RoundingMode.HALF_UP);
+
+            resultado.put(loteId, valorRateado);
+        }
+
+        log.info("Rateio por biomassa concluído. Biomassa total: {} kg", biomasTotal);
+        return resultado;
+    }
+
+    /**
+     * Rateio igualitário (divide igualmente)
+     */
+    private Map<Long, BigDecimal> ratearIgualitariamente(BigDecimal custoTotal, List<Long> lotesIds) {
+        Map<Long, BigDecimal> resultado = new HashMap<>();
+
+        BigDecimal valorPorLote = custoTotal.divide(
+                BigDecimal.valueOf(lotesIds.size()),
+                2,
+                RoundingMode.HALF_UP
+        );
+
+        for (Long loteId : lotesIds) {
+            resultado.put(loteId, valorPorLote);
+        }
+
+        log.info("Rateio igualitário concluído. Valor por lote: R$ {}", valorPorLote);
+        return resultado;
+    }
+
+    /**
+     * Registra o rateio de energia como custo variável nos lotes
+     */
+    @Transactional
+    public void registrarRateioEnergia(
+            BigDecimal custoTotalEnergia,
+            List<Long> lotesIds,
+            CriterioRateioEnergia criterioRateio,
+            LocalDate dataReferencia) {
+
+        log.info("Registrando rateio de energia para {} lotes", lotesIds.size());
+
+        Map<Long, BigDecimal> rateio = ratearEnergiaPorPeriodo(
+                custoTotalEnergia,
+                lotesIds,
+                criterioRateio
+        );
+
+        for (Map.Entry<Long, BigDecimal> entry : rateio.entrySet()) {
+            Long loteId = entry.getKey();
+            BigDecimal valor = entry.getValue();
+
+            Lote lote = loteRepository.findById(loteId)
+                    .orElseThrow(() -> new EntityNotFoundException("Lote", loteId));
+
+            CustoVariavel custoVariavel = CustoVariavel.builder()
+                    .lote(lote)
+                    .dataLancamento(dataReferencia)
+                    .categoria(CategoriaGastoEnum.ENERGIA)
+                    .descricao("Rateio de energia elétrica - " + criterioRateio)
+                    .valor(valor)
+                    .observacoes("Rateado automaticamente")
+                    .build();
+
+            custoVariavelRepository.save(custoVariavel);
+        }
+
+        log.info("Rateio de energia registrado com sucesso para {} lotes", lotesIds.size());
+    }
+
 }

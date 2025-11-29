@@ -15,4 +15,10 @@ public interface ViveiroRepository extends JpaRepository<Viveiro, Long> {
     List<Viveiro> findByStatus(StatusViveiroEnum status);
 
     List<Viveiro> findByFazendaIdAndAtivoTrue(Long fazendaId);
+
+    /**
+     * Conta viveiros por status
+     */
+    long countByStatus(StatusViveiroEnum status);
+
 }
