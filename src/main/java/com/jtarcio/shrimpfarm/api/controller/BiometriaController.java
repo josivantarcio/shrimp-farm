@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/biometrias")
+@RequestMapping("/v1/biometrias")
 @RequiredArgsConstructor
 public class BiometriaController {
 

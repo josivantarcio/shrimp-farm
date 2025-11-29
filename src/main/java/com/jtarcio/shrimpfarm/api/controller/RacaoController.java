@@ -15,7 +15,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/racoes")
+@RequestMapping("/v1/racoes")
 @RequiredArgsConstructor
 public class RacaoController {
 

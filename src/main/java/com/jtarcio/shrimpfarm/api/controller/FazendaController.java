@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/fazendas")
+@RequestMapping("/v1/fazendas")
 @RequiredArgsConstructor
 public class FazendaController {
 
