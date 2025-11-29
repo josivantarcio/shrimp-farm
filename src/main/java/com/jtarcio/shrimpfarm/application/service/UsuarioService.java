@@ -9,14 +9,11 @@ import com.jtarcio.shrimpfarm.domain.exception.EntityNotFoundException;
 import com.jtarcio.shrimpfarm.infrastructure.persistence.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -27,77 +24,55 @@ public class UsuarioService {
     private final UsuarioMapper usuarioMapper;
     private final PasswordEncoder passwordEncoder;
 
-    @Transactional
-    public UsuarioResponse criar(UsuarioRequest request) {
-        log.info("Criando novo usuário: {}", request.getEmail());
-
-        // Validar email único
-        if (usuarioRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new BusinessException("Já existe um usuário com o email: " + request.getEmail());
-        }
-
-        Usuario usuario = usuarioMapper.toEntity(request);
-        usuario.setSenha(passwordEncoder.encode(request.getSenha()));
-
-        Usuario usuarioSalvo = usuarioRepository.save(usuario);
-
-        log.info("Usuário criado com sucesso. ID: {}", usuarioSalvo.getId());
-        return usuarioMapper.toResponse(usuarioSalvo);
+    @Transactional(readOnly = true)
+    public List<UsuarioResponse> listarTodos() {
+        log.info("Listando todos os usuários ativos");
+        List<Usuario> usuarios = usuarioRepository.findByAtivoTrue();
+        return usuarioMapper.toResponseList(usuarios);
     }
 
     @Transactional(readOnly = true)
     public UsuarioResponse buscarPorId(Long id) {
-        log.debug("Buscando usuário por ID: {}", id);
-
+        log.info("Buscando usuário por id: {}", id);
         Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Usuário", id));
-
+                .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado com id: " + id));
         return usuarioMapper.toResponse(usuario);
     }
 
-    @Transactional(readOnly = true)
-    public UsuarioResponse buscarPorEmail(String email) {
-        log.debug("Buscando usuário por email: {}", email);
+    @Transactional
+    public UsuarioResponse criar(UsuarioRequest request) {
+        log.info("Criando novo usuário com email: {}, username: {}", request.getEmail(), request.getUsername());
 
-        Usuario usuario = usuarioRepository.findByEmail(email)
-                .orElseThrow(() -> new EntityNotFoundException("Usuário com email " + email + " não encontrado"));
+        // Validar email único
+        usuarioRepository.findByEmail(request.getEmail()).ifPresent(u -> {
+            throw new BusinessException("Já existe um usuário com o email: " + request.getEmail());
+        });
 
-        return usuarioMapper.toResponse(usuario);
-    }
+        // Validar username único
+        usuarioRepository.findByUsername(request.getUsername()).ifPresent(u -> {
+            throw new BusinessException("Já existe um usuário com o username: " + request.getUsername());
+        });
 
-    @Transactional(readOnly = true)
-    public List<UsuarioResponse> listarTodos() {
-        log.debug("Listando todos os usuários");
+        // Mapear DTO -> entidade
+        Usuario usuario = usuarioMapper.toEntity(request);
 
-        return usuarioRepository.findAll().stream()
-                .map(usuarioMapper::toResponse)
-                .collect(Collectors.toList());
-    }
+        // Criptografar senha
+        usuario.setSenha(passwordEncoder.encode(request.getSenha()));
 
-    @Transactional(readOnly = true)
-    public List<UsuarioResponse> listarAtivos() {
-        log.debug("Listando usuários ativos");
+        // Salvar
+        Usuario usuarioSalvo = usuarioRepository.save(usuario);
 
-        return usuarioRepository.findByAtivoTrue().stream()
-                .map(usuarioMapper::toResponse)
-                .collect(Collectors.toList());
-    }
+        log.info("Usuário criado com id: {}", usuarioSalvo.getId());
 
-    @Transactional(readOnly = true)
-    public Page<UsuarioResponse> listarPaginado(Pageable pageable) {
-        log.debug("Listando usuários paginados: página {}, tamanho {}",
-                pageable.getPageNumber(), pageable.getPageSize());
-
-        return usuarioRepository.findAll(pageable)
-                .map(usuarioMapper::toResponse);
+        return usuarioMapper.toResponse(usuarioSalvo);
     }
 
     @Transactional
     public UsuarioResponse atualizar(Long id, UsuarioRequest request) {
-        log.info("Atualizando usuário ID: {}", id);
+        log.info("Atualizando usuário id: {}", id);
 
-        Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Usuário", id));
+        Usuario usuarioExistente = usuarioRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado com id: " + id));
 
         // Validar email único (exceto o próprio)
         usuarioRepository.findByEmail(request.getEmail())
@@ -107,47 +82,65 @@ public class UsuarioService {
                     }
                 });
 
-        usuarioMapper.updateEntity(usuario, request);
-        Usuario usuarioAtualizado = usuarioRepository.save(usuario);
+        // Validar username único (exceto o próprio)
+        usuarioRepository.findByUsername(request.getUsername())
+                .ifPresent(u -> {
+                    if (!u.getId().equals(id)) {
+                        throw new BusinessException("Já existe outro usuário com o username: " + request.getUsername());
+                    }
+                });
 
-        log.info("Usuário atualizado com sucesso. ID: {}", id);
+        // Atualizar campos principais
+        usuarioMapper.updateEntity(usuarioExistente, request);
+
+        // Atualizar senha se veio no request
+        if (request.getSenha() != null && !request.getSenha().isBlank()) {
+            usuarioExistente.setSenha(passwordEncoder.encode(request.getSenha()));
+        }
+
+        Usuario usuarioAtualizado = usuarioRepository.save(usuarioExistente);
+
+        log.info("Usuário atualizado id: {}", usuarioAtualizado.getId());
+
         return usuarioMapper.toResponse(usuarioAtualizado);
     }
 
     @Transactional
-    public void alterarSenha(Long id, String novaSenha) {
-        log.info("Alterando senha do usuário ID: {}", id);
+    public void desativar(Long id) {
+        log.info("Desativando usuário id: {}", id);
 
         Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Usuário", id));
-
-        usuario.setSenha(passwordEncoder.encode(novaSenha));
-        usuarioRepository.save(usuario);
-
-        log.info("Senha alterada com sucesso. Usuário ID: {}", id);
-    }
-
-    @Transactional
-    public void deletar(Long id) {
-        log.info("Deletando usuário ID: {}", id);
-
-        Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Usuário", id));
-
-        usuarioRepository.delete(usuario);
-        log.info("Usuário deletado com sucesso. ID: {}", id);
-    }
-
-    @Transactional
-    public void inativar(Long id) {
-        log.info("Inativando usuário ID: {}", id);
-
-        Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Usuário", id));
+                .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado com id: " + id));
 
         usuario.setAtivo(false);
         usuarioRepository.save(usuario);
 
-        log.info("Usuário inativado com sucesso. ID: {}", id);
+        log.info("Usuário desativado id: {}", id);
     }
+
+    @Transactional
+    public void inativar(Long id) {
+        log.info("Inativando usuário id: {}", id);
+
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado com id: " + id));
+
+        usuario.setAtivo(false);
+        usuarioRepository.save(usuario);
+
+        log.info("Usuário inativado id: {}", id);
+    }
+
+    @Transactional
+    public void deletar(Long id) {
+        log.info("Deletando usuário id: {}", id);
+
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado com id: " + id));
+
+        usuarioRepository.delete(usuario);
+
+        log.info("Usuário deletado id: {}", id);
+    }
+
 }

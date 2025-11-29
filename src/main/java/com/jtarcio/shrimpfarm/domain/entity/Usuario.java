@@ -25,6 +25,9 @@ public class Usuario implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false, unique = true, length = 50)
+    private String username; // identificador de login (pode ser apelido, código, CPF simplificado etc.)
+
     @Column(nullable = false, unique = true, length = 100)
     private String email;
 

@@ -10,18 +10,13 @@ import java.util.Optional;
 @Repository
 public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
-    /**
-     * Busca usuário por email.
-     */
     Optional<Usuario> findByEmail(String email);
 
-    /**
-     * Lista todos os usuários ativos.
-     */
+    Optional<Usuario> findByUsername(String username);
+
     List<Usuario> findByAtivoTrue();
 
-    /**
-     * Verifica se já existe usuário com o email informado.
-     */
     boolean existsByEmail(String email);
+
+    boolean existsByUsername(String username);
 }

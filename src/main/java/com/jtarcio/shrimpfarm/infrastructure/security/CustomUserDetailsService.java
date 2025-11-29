@@ -17,16 +17,19 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     @Transactional(readOnly = true)
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        Usuario usuario = usuarioRepository.findByEmail(email)
+    public UserDetails loadUserByUsername(String login) throws UsernameNotFoundException {
+        // login pode ser email OU username
+        Usuario usuario = usuarioRepository.findByEmail(login)
+                .or(() -> usuarioRepository.findByUsername(login))
                 .orElseThrow(() -> new UsernameNotFoundException(
-                        "Usuário não encontrado com email: " + email
+                        "Usuário não encontrado com email/username: " + login
                 ));
 
         if (Boolean.FALSE.equals(usuario.getAtivo())) {
-            throw new UsernameNotFoundException("Usuário inativo: " + email);
+            throw new UsernameNotFoundException("Usuário inativo: " + login);
         }
 
-        return usuario; // Usuario já implementa UserDetails
+        // Usuario já implementa UserDetails, então podemos devolver direto
+        return usuario;
     }
 }

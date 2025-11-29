@@ -16,6 +16,7 @@ public class UsuarioResponse {
 
     private Long id;
     private String nome;
+    private String username;
     private String email;
     private RoleEnum papel;  // ← MUDANÇA: papel -> role
     private Boolean ativo;

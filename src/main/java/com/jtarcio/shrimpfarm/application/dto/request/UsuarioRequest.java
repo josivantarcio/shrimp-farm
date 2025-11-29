@@ -17,6 +17,10 @@ public class UsuarioRequest {
     @Size(max = 100, message = "Nome deve ter no máximo 100 caracteres")
     private String nome;
 
+    @NotBlank(message = "Username é obrigatório")
+    @Size(min = 3, max = 50, message = "Username deve ter entre 3 e 50 caracteres")
+    private String username;   // novo campo
+
     @NotBlank(message = "Email é obrigatório")
     @Email(message = "Email inválido")
     @Size(max = 100, message = "Email deve ter no máximo 100 caracteres")
@@ -27,7 +31,7 @@ public class UsuarioRequest {
     private String senha;
 
     @NotNull(message = "Role do usuário é obrigatório")
-    private RoleEnum papel;  // ← MUDANÇA: papel -> role
+    private RoleEnum papel;
 
     @Builder.Default
     private Boolean ativo = true;
