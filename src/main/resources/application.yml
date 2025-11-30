@@ -41,6 +41,6 @@
       enabled: true
 
   jwt:
-    secret: Y29tLmp0YXJjaW8uc2hyaW1wZmFybS5zZWNyZXQua2V5LnNlY3VyZS4yMDI1
-    expiration: 86400000
+
+
 

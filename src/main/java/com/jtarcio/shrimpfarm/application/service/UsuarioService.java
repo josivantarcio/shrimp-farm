@@ -9,7 +9,6 @@ import com.jtarcio.shrimpfarm.domain.exception.EntityNotFoundException;
 import com.jtarcio.shrimpfarm.infrastructure.persistence.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,7 +21,7 @@ public class UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
     private final UsuarioMapper usuarioMapper;
-    private final PasswordEncoder passwordEncoder;
+
 
     @Transactional(readOnly = true)
     public List<UsuarioResponse> listarTodos() {
@@ -35,33 +34,28 @@ public class UsuarioService {
     public UsuarioResponse buscarPorId(Long id) {
         log.info("Buscando usuário por id: {}", id);
         Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado com id: " + id));
+                .orElseThrow(() ->
+                        new EntityNotFoundException("Usuário não encontrado com id: " + id));
         return usuarioMapper.toResponse(usuario);
     }
 
     @Transactional
     public UsuarioResponse criar(UsuarioRequest request) {
-        log.info("Criando novo usuário com email: {}, username: {}", request.getEmail(), request.getUsername());
+        log.info("Criando novo usuário com email: {}, username: {}",
+                request.getEmail(), request.getUsername());
 
         // Validar email único
         usuarioRepository.findByEmail(request.getEmail()).ifPresent(u -> {
             throw new BusinessException("Já existe um usuário com o email: " + request.getEmail());
         });
 
-        // Validar username único
-        usuarioRepository.findByUsername(request.getUsername()).ifPresent(u -> {
-            throw new BusinessException("Já existe um usuário com o username: " + request.getUsername());
-        });
 
         // Mapear DTO -> entidade
         Usuario usuario = usuarioMapper.toEntity(request);
 
-        // Criptografar senha
-        usuario.setSenha(passwordEncoder.encode(request.getSenha()));
 
         // Salvar
         Usuario usuarioSalvo = usuarioRepository.save(usuario);
-
         log.info("Usuário criado com id: {}", usuarioSalvo.getId());
 
         return usuarioMapper.toResponse(usuarioSalvo);
@@ -72,34 +66,24 @@ public class UsuarioService {
         log.info("Atualizando usuário id: {}", id);
 
         Usuario usuarioExistente = usuarioRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado com id: " + id));
+                .orElseThrow(() ->
+                        new EntityNotFoundException("Usuário não encontrado com id: " + id));
 
         // Validar email único (exceto o próprio)
         usuarioRepository.findByEmail(request.getEmail())
                 .ifPresent(u -> {
                     if (!u.getId().equals(id)) {
-                        throw new BusinessException("Já existe outro usuário com o email: " + request.getEmail());
+                        throw new BusinessException(
+                                "Já existe outro usuário com o email: " + request.getEmail());
                     }
                 });
 
-        // Validar username único (exceto o próprio)
-        usuarioRepository.findByUsername(request.getUsername())
-                .ifPresent(u -> {
-                    if (!u.getId().equals(id)) {
-                        throw new BusinessException("Já existe outro usuário com o username: " + request.getUsername());
-                    }
-                });
 
         // Atualizar campos principais
         usuarioMapper.updateEntity(usuarioExistente, request);
 
-        // Atualizar senha se veio no request
-        if (request.getSenha() != null && !request.getSenha().isBlank()) {
-            usuarioExistente.setSenha(passwordEncoder.encode(request.getSenha()));
-        }
 
         Usuario usuarioAtualizado = usuarioRepository.save(usuarioExistente);
-
         log.info("Usuário atualizado id: {}", usuarioAtualizado.getId());
 
         return usuarioMapper.toResponse(usuarioAtualizado);
@@ -108,39 +92,32 @@ public class UsuarioService {
     @Transactional
     public void desativar(Long id) {
         log.info("Desativando usuário id: {}", id);
-
         Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado com id: " + id));
-
+                .orElseThrow(() ->
+                        new EntityNotFoundException("Usuário não encontrado com id: " + id));
         usuario.setAtivo(false);
         usuarioRepository.save(usuario);
-
         log.info("Usuário desativado id: {}", id);
     }
 
     @Transactional
     public void inativar(Long id) {
         log.info("Inativando usuário id: {}", id);
-
         Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado com id: " + id));
-
+                .orElseThrow(() ->
+                        new EntityNotFoundException("Usuário não encontrado com id: " + id));
         usuario.setAtivo(false);
         usuarioRepository.save(usuario);
-
         log.info("Usuário inativado id: {}", id);
     }
 
     @Transactional
     public void deletar(Long id) {
         log.info("Deletando usuário id: {}", id);
-
         Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado com id: " + id));
-
+                .orElseThrow(() ->
+                        new EntityNotFoundException("Usuário não encontrado com id: " + id));
         usuarioRepository.delete(usuario);
-
         log.info("Usuário deletado id: {}", id);
     }
-
 }

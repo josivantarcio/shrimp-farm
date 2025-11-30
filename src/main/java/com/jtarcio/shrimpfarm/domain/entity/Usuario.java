@@ -6,12 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.List;
 
 @Entity
 @Table(name = "usuarios")
@@ -19,14 +15,11 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Usuario implements UserDetails {
+public class Usuario {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(nullable = false, unique = true, length = 50)
-    private String username; // identificador de login (pode ser apelido, código, CPF simplificado etc.)
 
     @Column(nullable = false, unique = true, length = 100)
     private String email;
@@ -63,41 +56,5 @@ public class Usuario implements UserDetails {
     @PreUpdate
     protected void onUpdate() {
         dataAtualizacao = LocalDateTime.now();
-    }
-
-    // Implementação do UserDetails para Spring Security
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(papel);
-    }
-
-    @Override
-    public String getPassword() {
-        return senha;
-    }
-
-    @Override
-    public String getUsername() {
-        return email;
-    }
-
-    @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isAccountNonLocked() {
-        return true;
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return ativo;
     }
 }

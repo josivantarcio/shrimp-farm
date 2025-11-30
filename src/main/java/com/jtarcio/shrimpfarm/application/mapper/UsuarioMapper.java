@@ -14,7 +14,6 @@ public class UsuarioMapper {
     public Usuario toEntity(UsuarioRequest request) {
         return Usuario.builder()
                 .nome(request.getNome())
-                .username(request.getUsername())
                 .email(request.getEmail())
                 .senha(request.getSenha()) // será criptografada no service
                 .papel(request.getPapel())
@@ -26,7 +25,6 @@ public class UsuarioMapper {
         return UsuarioResponse.builder()
                 .id(usuario.getId())
                 .nome(usuario.getNome())
-                .username(usuario.getUsername())
                 .email(usuario.getEmail())
                 .papel(usuario.getPapel())
                 .ativo(usuario.getAtivo())
@@ -43,7 +41,6 @@ public class UsuarioMapper {
 
     public void updateEntity(Usuario usuario, UsuarioRequest request) {
         usuario.setNome(request.getNome());
-        usuario.setUsername(request.getUsername());
         usuario.setEmail(request.getEmail());
         usuario.setPapel(request.getPapel());
         usuario.setAtivo(request.getAtivo());
