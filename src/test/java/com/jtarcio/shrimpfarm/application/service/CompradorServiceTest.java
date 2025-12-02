@@ -14,17 +14,23 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("Testes do CompradorService")
+@DisplayName("CompradorService - Testes Unitários")
 class CompradorServiceTest {
 
     @Mock
@@ -36,114 +42,226 @@ class CompradorServiceTest {
     @InjectMocks
     private CompradorService compradorService;
 
-    private CompradorRequest request;
     private Comprador comprador;
+    private CompradorRequest request;
     private CompradorResponse response;
 
     @BeforeEach
     void setUp() {
-        request = CompradorRequest.builder()
-                .nome("Cliente Teste")
-                .cnpj("12345678000199")
-                .contato("11 99999-9999")
-                .endereco("Rua A, 100")
-                .ativo(true)
-                .build();
-
         comprador = Comprador.builder()
                 .id(1L)
-                .nome(request.getNome())
-                .cnpj(request.getCnpj())
-                .contato(request.getContato())
-                .endereco(request.getEndereco())
-                .ativo(request.getAtivo())
-                .dataCriacao(LocalDateTime.now().minusDays(1))
+                .nome("Comprador Teste")
+                .cnpj("12345678901234")
+                .contato("João Silva")
+                .endereco("Rua Teste, 123")
+                .ativo(true)
+                .dataCriacao(LocalDateTime.now())
                 .dataAtualizacao(LocalDateTime.now())
                 .build();
 
+        request = CompradorRequest.builder()
+                .nome("Comprador Teste")
+                .cnpj("12345678901234")
+                .contato("João Silva")
+                .endereco("Rua Teste, 123")
+                .ativo(true)
+                .build();
+
         response = CompradorResponse.builder()
-                .id(comprador.getId())
-                .nome(comprador.getNome())
-                .cnpj(comprador.getCnpj())
-                .contato(comprador.getContato())
-                .endereco(comprador.getEndereco())
-                .ativo(comprador.getAtivo())
-                .dataCriacao(comprador.getDataCriacao())
-                .dataAtualizacao(comprador.getDataAtualizacao())
+                .id(1L)
+                .nome("Comprador Teste")
+                .cnpj("12345678901234")
+                .contato("João Silva")
+                .endereco("Rua Teste, 123")
+                .ativo(true)
+                .dataCriacao(LocalDateTime.now())
+                .dataAtualizacao(LocalDateTime.now())
                 .build();
     }
 
     @Test
-    @DisplayName("criarComprador() deve lançar BusinessException se CNPJ já existir")
-    void criarCompradorDeveLancarBusinessQuandoCnpjJaExiste() {
-        when(compradorRepository.findByCnpj(request.getCnpj()))
-                .thenReturn(Optional.of(comprador));
-
-        assertThrows(BusinessException.class,
-                () -> compradorService.criar(request));
-
-        verify(compradorRepository, times(1)).findByCnpj(request.getCnpj());
-        verify(compradorRepository, never()).save(any());
-    }
-
-    @Test
-    @DisplayName("criarComprador() deve criar comprador quando CNPJ for único")
-    void criarCompradorDeveCriarQuandoCnpjUnico() {
-        when(compradorRepository.findByCnpj(request.getCnpj()))
-                .thenReturn(Optional.empty());
+    @DisplayName("Deve criar comprador com sucesso")
+    void deveCriarCompradorComSucesso() {
+        // Arrange
+        when(compradorRepository.findByCnpj(anyString())).thenReturn(Optional.empty());
         when(compradorMapper.toEntity(request)).thenReturn(comprador);
-        when(compradorRepository.save(comprador)).thenReturn(comprador);
+        when(compradorRepository.save(any(Comprador.class))).thenReturn(comprador);
         when(compradorMapper.toResponse(comprador)).thenReturn(response);
 
+        // Act
         CompradorResponse resultado = compradorService.criar(request);
 
-        assertNotNull(resultado);
-        assertEquals(response.getId(), resultado.getId());
-        verify(compradorRepository, times(1)).save(comprador);
+        // Assert
+        assertThat(resultado).isNotNull();
+        assertThat(resultado.getNome()).isEqualTo("Comprador Teste");
+        assertThat(resultado.getCnpj()).isEqualTo("12345678901234");
+        verify(compradorRepository).findByCnpj("12345678901234");
+        verify(compradorRepository).save(any(Comprador.class));
     }
 
     @Test
-    @DisplayName("buscarPorId() deve lançar EntityNotFoundException quando não encontrar")
-    void buscarPorIdDeveLancarEntityNotFound() {
-        when(compradorRepository.findById(1L)).thenReturn(Optional.empty());
+    @DisplayName("Deve lançar exceção ao criar comprador com CNPJ duplicado")
+    void deveLancarExcecaoAoCriarCompradorComCnpjDuplicado() {
+        // Arrange
+        when(compradorRepository.findByCnpj(anyString())).thenReturn(Optional.of(comprador));
 
-        assertThrows(EntityNotFoundException.class,
-                () -> compradorService.buscarPorId(1L));
+        // Act & Assert
+        assertThatThrownBy(() -> compradorService.criar(request))
+                .isInstanceOf(BusinessException.class)
+                .hasMessageContaining("Já existe um comprador com o CNPJ/CPF");
 
-        verify(compradorRepository, times(1)).findById(1L);
+        verify(compradorRepository, never()).save(any(Comprador.class));
     }
 
     @Test
-    @DisplayName("buscarPorId() deve retornar comprador mapeado quando encontrar")
-    void buscarPorIdDeveRetornarResponse() {
+    @DisplayName("Deve buscar comprador por ID com sucesso")
+    void deveBuscarCompradorPorIdComSucesso() {
+        // Arrange
         when(compradorRepository.findById(1L)).thenReturn(Optional.of(comprador));
         when(compradorMapper.toResponse(comprador)).thenReturn(response);
 
+        // Act
         CompradorResponse resultado = compradorService.buscarPorId(1L);
 
-        assertEquals(response.getId(), resultado.getId());
-        assertEquals(response.getCnpj(), resultado.getCnpj());
+        // Assert
+        assertThat(resultado).isNotNull();
+        assertThat(resultado.getId()).isEqualTo(1L);
+        verify(compradorRepository).findById(1L);
     }
 
     @Test
-    @DisplayName("listarTodos() deve retornar lista mapeada")
-    void listarTodosDeveRetornarListaMapeada() {
-        when(compradorRepository.findAll()).thenReturn(List.of(comprador));
-        when(compradorMapper.toResponse(any(Comprador.class))).thenReturn(response);
+    @DisplayName("Deve lançar exceção ao buscar comprador inexistente")
+    void deveLancarExcecaoAoBuscarCompradorInexistente() {
+        // Arrange
+        when(compradorRepository.findById(999L)).thenReturn(Optional.empty());
 
-        List<CompradorResponse> lista = compradorService.listarTodos();
-
-        assertEquals(1, lista.size());
-        assertEquals(response.getId(), lista.get(0).getId());
-        verify(compradorRepository, times(1)).findAll();
+        // Act & Assert
+        assertThatThrownBy(() -> compradorService.buscarPorId(999L))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessageContaining("Comprador");
     }
 
     @Test
-    @DisplayName("listarAtivos() deve retornar apenas compradores ativos")
-    void listarAtivosDeveRetornarApenasAtivos() {
-        when(compradorRepository.findByAtivoTrue()).thenReturn(List.of(comprador));
+    @DisplayName("Deve listar todos os compradores")
+    void deveListarTodosCompradores() {
+        // Arrange
+        List<Comprador> compradores = Arrays.asList(comprador, comprador);
+        when(compradorRepository.findAll()).thenReturn(compradores);
         when(compradorMapper.toResponse(any(Comprador.class))).thenReturn(response);
 
-        List<CompradorResponse> lista = compradorService.listarAtivos();
+        // Act
+        List<CompradorResponse> resultado = compradorService.listarTodos();
+
+        // Assert
+        assertThat(resultado).hasSize(2);
+        verify(compradorRepository).findAll();
+    }
+
+    @Test
+    @DisplayName("Deve listar apenas compradores ativos")
+    void deveListarApenasCompradoresAtivos() {
+        // Arrange
+        List<Comprador> compradoresAtivos = Arrays.asList(comprador);
+        when(compradorRepository.findByAtivoTrue()).thenReturn(compradoresAtivos);
+        when(compradorMapper.toResponse(any(Comprador.class))).thenReturn(response);
+
+        // Act
+        List<CompradorResponse> resultado = compradorService.listarAtivos();
+
+        // Assert
+        assertThat(resultado).hasSize(1);
+        assertThat(resultado.get(0).getAtivo()).isTrue();
+        verify(compradorRepository).findByAtivoTrue();
+    }
+
+    @Test
+    @DisplayName("Deve listar compradores paginados")
+    void deveListarCompradoresPaginados() {
+        // Arrange
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Comprador> page = new PageImpl<>(Arrays.asList(comprador));
+        when(compradorRepository.findAll(pageable)).thenReturn(page);
+        when(compradorMapper.toResponse(any(Comprador.class))).thenReturn(response);
+
+        // Act
+        Page<CompradorResponse> resultado = compradorService.listarPaginado(pageable);
+
+        // Assert
+        assertThat(resultado).isNotNull();
+        assertThat(resultado.getContent()).hasSize(1);
+        verify(compradorRepository).findAll(pageable);
+    }
+
+    @Test
+    @DisplayName("Deve atualizar comprador com sucesso")
+    void deveAtualizarCompradorComSucesso() {
+        // Arrange
+        when(compradorRepository.findById(1L)).thenReturn(Optional.of(comprador));
+        when(compradorRepository.findByCnpj(anyString())).thenReturn(Optional.of(comprador));
+        when(compradorRepository.save(any(Comprador.class))).thenReturn(comprador);
+        when(compradorMapper.toResponse(comprador)).thenReturn(response);
+
+        // Act
+        CompradorResponse resultado = compradorService.atualizar(1L, request);
+
+        // Assert
+        assertThat(resultado).isNotNull();
+        verify(compradorMapper).updateEntity(comprador, request);
+        verify(compradorRepository).save(comprador);
+    }
+
+    @Test
+    @DisplayName("Deve lançar exceção ao atualizar com CNPJ de outro comprador")
+    void deveLancarExcecaoAoAtualizarComCnpjDeOutroComprador() {
+        // Arrange
+        Comprador outroComprador = Comprador.builder().id(2L).cnpj("12345678901234").build();
+        when(compradorRepository.findById(1L)).thenReturn(Optional.of(comprador));
+        when(compradorRepository.findByCnpj(anyString())).thenReturn(Optional.of(outroComprador));
+
+        // Act & Assert
+        assertThatThrownBy(() -> compradorService.atualizar(1L, request))
+                .isInstanceOf(BusinessException.class)
+                .hasMessageContaining("Já existe outro comprador com o CNPJ/CPF");
+
+        verify(compradorRepository, never()).save(any(Comprador.class));
+    }
+
+    @Test
+    @DisplayName("Deve deletar comprador com sucesso")
+    void deveDeletarCompradorComSucesso() {
+        // Arrange
+        when(compradorRepository.findById(1L)).thenReturn(Optional.of(comprador));
+
+        // Act
+        compradorService.deletar(1L);
+
+        // Assert
+        verify(compradorRepository).delete(comprador);
+    }
+
+    @Test
+    @DisplayName("Deve inativar comprador com sucesso")
+    void deveInativarCompradorComSucesso() {
+        // Arrange
+        when(compradorRepository.findById(1L)).thenReturn(Optional.of(comprador));
+        when(compradorRepository.save(any(Comprador.class))).thenReturn(comprador);
+
+        // Act
+        compradorService.inativar(1L);
+
+        // Assert
+        assertThat(comprador.getAtivo()).isFalse();
+        verify(compradorRepository).save(comprador);
+    }
+
+    @Test
+    @DisplayName("Deve lançar exceção ao deletar comprador inexistente")
+    void deveLancarExcecaoAoDeletarCompradorInexistente() {
+        // Arrange
+        when(compradorRepository.findById(999L)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThatThrownBy(() -> compradorService.deletar(999L))
+                .isInstanceOf(EntityNotFoundException.class);
     }
 }

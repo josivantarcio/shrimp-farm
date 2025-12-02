@@ -7,8 +7,6 @@ import com.jtarcio.shrimpfarm.domain.entity.Fornecedor;
 import com.jtarcio.shrimpfarm.domain.entity.Lote;
 import com.jtarcio.shrimpfarm.domain.entity.Nutriente;
 import com.jtarcio.shrimpfarm.domain.enums.StatusLoteEnum;
-import com.jtarcio.shrimpfarm.domain.enums.TipoNutrienteEnum;
-import com.jtarcio.shrimpfarm.domain.enums.UnidadeMedidaEnum;
 import com.jtarcio.shrimpfarm.domain.exception.BusinessException;
 import com.jtarcio.shrimpfarm.domain.exception.EntityNotFoundException;
 import com.jtarcio.shrimpfarm.infrastructure.persistence.FornecedorRepository;
@@ -21,18 +19,24 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("Testes do NutrienteService")
+@DisplayName("NutrienteService - Testes Unitários")
 class NutrienteServiceTest {
 
     @Mock
@@ -50,205 +54,260 @@ class NutrienteServiceTest {
     @InjectMocks
     private NutrienteService nutrienteService;
 
-    private Lote loteAtivo;
+    private Lote lote;
     private Fornecedor fornecedor;
-    private NutrienteRequest request;
     private Nutriente nutriente;
+    private NutrienteRequest request;
     private NutrienteResponse response;
 
     @BeforeEach
     void setUp() {
-        loteAtivo = Lote.builder()
-                .id(10L)
-                .codigo("LOTE01_2025")
-                .dataPovoamento(LocalDate.of(2025, 1, 1))
+        lote = Lote.builder()
+                .id(1L)
                 .status(StatusLoteEnum.ATIVO)
+                .dataPovoamento(LocalDate.now().minusDays(10))
                 .build();
 
         fornecedor = Fornecedor.builder()
-                .id(5L)
-                .nome("Fornecedor Nutriente")
-                .build();
-
-        request = NutrienteRequest.builder()
-                .loteId(10L)
-                .fornecedorId(5L)
-                .dataAplicacao(LocalDate.of(2025, 1, 10))
-                .tipoNutriente(TipoNutrienteEnum.PROBIOTICO)
-                .produto("Probiótico X")
-                .quantidade(new BigDecimal("10.000"))
-                .unidade(UnidadeMedidaEnum.KG)
-                .custoUnitario(new BigDecimal("50.00"))
-                .observacoes("Primeira aplicação")
+                .id(1L)
+                .nome("Fornecedor Teste")
                 .build();
 
         nutriente = Nutriente.builder()
                 .id(1L)
-                .lote(loteAtivo)
+                .lote(lote)
                 .fornecedor(fornecedor)
-                .dataAplicacao(request.getDataAplicacao())
-                .tipoNutriente(request.getTipoNutriente())
-                .produto(request.getProduto())
-                .quantidade(request.getQuantidade())
-                .unidade(request.getUnidade())
-                .custoUnitario(request.getCustoUnitario())
-                .custoTotal(new BigDecimal("500.00"))
-                .observacoes(request.getObservacoes())
+                .produto("Vitamina C")
+                .dataAplicacao(LocalDate.now())
+                .quantidade(new BigDecimal("10.00"))
+                .custoTotal(new BigDecimal("200.00"))
+                .build();
+
+        request = NutrienteRequest.builder()
+                .loteId(1L)
+                .fornecedorId(1L)
+                .produto("Vitamina C")
+                .dataAplicacao(LocalDate.now())
+                .quantidade(new BigDecimal("10.00"))
                 .build();
 
         response = NutrienteResponse.builder()
-                .id(nutriente.getId())
-                .loteId(loteAtivo.getId())
-                .loteCodigo(loteAtivo.getCodigo())
-                .fornecedorId(fornecedor.getId())
-                .fornecedorNome(fornecedor.getNome())
-                .dataAplicacao(nutriente.getDataAplicacao())
-                .tipoNutriente(nutriente.getTipoNutriente())
-                .produto(nutriente.getProduto())
-                .quantidade(nutriente.getQuantidade())
-                .unidade(nutriente.getUnidade())
-                .custoUnitario(nutriente.getCustoUnitario())
-                .custoTotal(nutriente.getCustoTotal())
-                .observacoes(nutriente.getObservacoes())
+                .id(1L)
+                .loteId(1L)
+                .fornecedorNome("Fornecedor Teste")
+                .produto("Vitamina C")
+                .dataAplicacao(LocalDate.now())
+                .quantidade(new BigDecimal("10.00"))
+                .custoTotal(new BigDecimal("200.00"))
                 .build();
     }
 
     @Test
-    @DisplayName("criar() deve registrar nutriente em lote ATIVO")
-    void criarDeveRegistrarNutrienteEmLoteAtivo() {
-        when(loteRepository.findById(10L)).thenReturn(Optional.of(loteAtivo));
-        when(fornecedorRepository.findById(5L)).thenReturn(Optional.of(fornecedor));
-        when(nutrienteMapper.toEntity(request, loteAtivo, fornecedor)).thenReturn(nutriente);
-        when(nutrienteRepository.save(any(Nutriente.class)))
-                .thenAnswer(invocation -> invocation.getArgument(0));
-        when(nutrienteMapper.toResponse(any(Nutriente.class))).thenReturn(response);
+    @DisplayName("Deve criar nutriente com sucesso")
+    void deveCriarNutrienteComSucesso() {
+        // Arrange
+        when(loteRepository.findById(1L)).thenReturn(Optional.of(lote));
+        when(fornecedorRepository.findById(1L)).thenReturn(Optional.of(fornecedor));
+        when(nutrienteMapper.toEntity(request, lote, fornecedor)).thenReturn(nutriente);
+        when(nutrienteRepository.save(any(Nutriente.class))).thenReturn(nutriente);
+        when(nutrienteMapper.toResponse(nutriente)).thenReturn(response);
 
+        // Act
         NutrienteResponse resultado = nutrienteService.criar(request);
 
-        assertNotNull(resultado);
-        assertEquals(1L, resultado.getId());
-        assertEquals(new BigDecimal("500.00"), resultado.getCustoTotal());
-
-        verify(loteRepository).findById(10L);
-        verify(fornecedorRepository).findById(5L);
-        verify(nutrienteMapper).toEntity(request, loteAtivo, fornecedor);
+        // Assert
+        assertThat(resultado).isNotNull();
+        assertThat(resultado.getProduto()).isEqualTo("Vitamina C");
+        assertThat(resultado.getCustoTotal()).isEqualByComparingTo("200.00");
         verify(nutrienteRepository).save(any(Nutriente.class));
-        verify(nutrienteMapper).toResponse(any(Nutriente.class));
     }
 
     @Test
-    @DisplayName("criar() deve lançar EntityNotFoundException quando lote não existe")
-    void criarDeveLancarEntityNotFoundQuandoLoteNaoExiste() {
-        when(loteRepository.findById(10L)).thenReturn(Optional.empty());
+    @DisplayName("Deve criar nutriente sem fornecedor")
+    void deveCriarNutrienteSemFornecedor() {
+        // Arrange
+        request.setFornecedorId(null);
+        when(loteRepository.findById(1L)).thenReturn(Optional.of(lote));
+        when(nutrienteMapper.toEntity(request, lote, null)).thenReturn(nutriente);
+        when(nutrienteRepository.save(any(Nutriente.class))).thenReturn(nutriente);
+        when(nutrienteMapper.toResponse(nutriente)).thenReturn(response);
 
-        assertThrows(EntityNotFoundException.class,
-                () -> nutrienteService.criar(request));
+        // Act
+        NutrienteResponse resultado = nutrienteService.criar(request);
+
+        // Assert
+        assertThat(resultado).isNotNull();
+        verify(fornecedorRepository, never()).findById(any());
+    }
+
+    @Test
+    @DisplayName("Deve lançar exceção ao criar nutriente em lote não ativo")
+    void deveLancarExcecaoAoCriarEmLoteNaoAtivo() {
+        // Arrange
+        lote.setStatus(StatusLoteEnum.FINALIZADO);
+        when(loteRepository.findById(1L)).thenReturn(Optional.of(lote));
+
+        // Act & Assert
+        assertThatThrownBy(() -> nutrienteService.criar(request))
+                .isInstanceOf(BusinessException.class)
+                .hasMessageContaining("Só é possível registrar nutrientes em lotes ativos");
 
         verify(nutrienteRepository, never()).save(any());
     }
 
     @Test
-    @DisplayName("criar() deve lançar BusinessException quando lote não está ATIVO")
-    void criarDeveLancarBusinessQuandoLoteNaoAtivo() {
-        loteAtivo.setStatus(StatusLoteEnum.PLANEJADO);
-        when(loteRepository.findById(10L)).thenReturn(Optional.of(loteAtivo));
+    @DisplayName("Deve lançar exceção ao criar nutriente com data anterior ao povoamento")
+    void deveLancarExcecaoDataAnteriorPovoamento() {
+        // Arrange
+        request.setDataAplicacao(LocalDate.now().minusDays(20));
+        when(loteRepository.findById(1L)).thenReturn(Optional.of(lote));
 
-        assertThrows(BusinessException.class,
-                () -> nutrienteService.criar(request));
-
-        verify(nutrienteRepository, never()).save(any());
+        // Act & Assert
+        assertThatThrownBy(() -> nutrienteService.criar(request))
+                .isInstanceOf(BusinessException.class)
+                .hasMessageContaining("Data de aplicação não pode ser anterior ao povoamento");
     }
 
     @Test
-    @DisplayName("criar() deve lançar BusinessException quando dataAplicacao é antes do povoamento")
-    void criarDeveLancarBusinessQuandoDataAntesPovoamento() {
-        NutrienteRequest requestInvalido = NutrienteRequest.builder()
-                .loteId(10L)
-                .fornecedorId(5L)
-                .dataAplicacao(LocalDate.of(2024, 12, 31))
-                .tipoNutriente(TipoNutrienteEnum.PROBIOTICO)
-                .produto("Probiótico X")
-                .quantidade(new BigDecimal("10.000"))
-                .unidade(UnidadeMedidaEnum.KG)
-                .custoUnitario(new BigDecimal("50.00"))
-                .observacoes("Data inválida")
-                .build();
-
-        when(loteRepository.findById(10L)).thenReturn(Optional.of(loteAtivo));
-
-        assertThrows(BusinessException.class,
-                () -> nutrienteService.criar(requestInvalido));
-
-        verify(nutrienteRepository, never()).save(any());
-    }
-
-    @Test
-    @DisplayName("buscarPorId() deve retornar nutriente quando encontrar")
-    void buscarPorIdDeveRetornarQuandoEncontrar() {
+    @DisplayName("Deve buscar nutriente por ID")
+    void deveBuscarNutrientePorId() {
+        // Arrange
         when(nutrienteRepository.findById(1L)).thenReturn(Optional.of(nutriente));
         when(nutrienteMapper.toResponse(nutriente)).thenReturn(response);
 
+        // Act
         NutrienteResponse resultado = nutrienteService.buscarPorId(1L);
 
-        assertNotNull(resultado);
-        assertEquals(1L, resultado.getId());
+        // Assert
+        assertThat(resultado).isNotNull();
+        assertThat(resultado.getId()).isEqualTo(1L);
     }
 
     @Test
-    @DisplayName("buscarPorId() deve lançar EntityNotFoundException quando não encontrar")
-    void buscarPorIdDeveLancarEntityNotFoundQuandoNaoEncontrar() {
-        when(nutrienteRepository.findById(1L)).thenReturn(Optional.empty());
+    @DisplayName("Deve lançar exceção ao buscar nutriente inexistente")
+    void deveLancarExcecaoAoBuscarNutrienteInexistente() {
+        // Arrange
+        when(nutrienteRepository.findById(999L)).thenReturn(Optional.empty());
 
-        assertThrows(EntityNotFoundException.class,
-                () -> nutrienteService.buscarPorId(1L));
+        // Act & Assert
+        assertThatThrownBy(() -> nutrienteService.buscarPorId(999L))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessageContaining("Nutriente");
     }
 
     @Test
-    @DisplayName("listarPorLote() deve retornar lista quando lote existe")
-    void listarPorLoteDeveRetornarListaQuandoLoteExiste() {
-        when(loteRepository.existsById(10L)).thenReturn(true);
-        when(nutrienteRepository.findByLoteIdOrderByDataAplicacaoAsc(10L))
-                .thenReturn(List.of(nutriente));
+    @DisplayName("Deve listar nutrientes por lote")
+    void deveListarNutrientesPorLote() {
+        // Arrange
+        when(loteRepository.existsById(1L)).thenReturn(true);
+        when(nutrienteRepository.findByLoteIdOrderByDataAplicacaoAsc(1L))
+                .thenReturn(Arrays.asList(nutriente));
+        when(nutrienteMapper.toResponse(any(Nutriente.class))).thenReturn(response);
+
+        // Act
+        List<NutrienteResponse> resultado = nutrienteService.listarPorLote(1L);
+
+        // Assert
+        assertThat(resultado).hasSize(1);
+        verify(loteRepository).existsById(1L);
+    }
+
+    @Test
+    @DisplayName("Deve lançar exceção ao listar nutrientes de lote inexistente")
+    void deveLancarExcecaoAoListarPorLoteInexistente() {
+        // Arrange
+        when(loteRepository.existsById(999L)).thenReturn(false);
+
+        // Act & Assert
+        assertThatThrownBy(() -> nutrienteService.listarPorLote(999L))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessageContaining("Lote");
+    }
+
+    @Test
+    @DisplayName("Deve calcular custo total de nutrientes")
+    void deveCalcularCustoTotal() {
+        // Arrange
+        when(nutrienteRepository.calcularCustoTotalNutrientesByLoteId(1L))
+                .thenReturn(new BigDecimal("800.00"));
+
+        // Act
+        BigDecimal resultado = nutrienteService.calcularCustoTotalPorLote(1L);
+
+        // Assert
+        assertThat(resultado).isEqualByComparingTo("800.00");
+    }
+
+    @Test
+    @DisplayName("Deve retornar zero quando não há nutrientes")
+    void deveRetornarZeroQuandoNaoHaNutrientes() {
+        // Arrange
+        when(nutrienteRepository.calcularCustoTotalNutrientesByLoteId(1L)).thenReturn(null);
+
+        // Act
+        BigDecimal resultado = nutrienteService.calcularCustoTotalPorLote(1L);
+
+        // Assert
+        assertThat(resultado).isEqualByComparingTo(BigDecimal.ZERO);
+    }
+
+    @Test
+    @DisplayName("Deve listar nutrientes paginados")
+    void deveListarNutrientesPaginados() {
+        // Arrange
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Nutriente> page = new PageImpl<>(Arrays.asList(nutriente));
+        when(nutrienteRepository.findAll(pageable)).thenReturn(page);
+        when(nutrienteMapper.toResponse(any(Nutriente.class))).thenReturn(response);
+
+        // Act
+        Page<NutrienteResponse> resultado = nutrienteService.listarPaginado(pageable);
+
+        // Assert
+        assertThat(resultado).isNotNull();
+        assertThat(resultado.getContent()).hasSize(1);
+    }
+
+    @Test
+    @DisplayName("Deve atualizar nutriente com sucesso")
+    void deveAtualizarNutrienteComSucesso() {
+        // Arrange
+        when(nutrienteRepository.findById(1L)).thenReturn(Optional.of(nutriente));
+        when(loteRepository.findById(1L)).thenReturn(Optional.of(lote));
+        when(fornecedorRepository.findById(1L)).thenReturn(Optional.of(fornecedor));
+        when(nutrienteRepository.save(any(Nutriente.class))).thenReturn(nutriente);
         when(nutrienteMapper.toResponse(nutriente)).thenReturn(response);
 
-        var resultado = nutrienteService.listarPorLote(10L);
+        // Act
+        NutrienteResponse resultado = nutrienteService.atualizar(1L, request);
 
-        assertEquals(1, resultado.size());
-        assertEquals(1L, resultado.get(0).getId());
+        // Assert
+        assertThat(resultado).isNotNull();
+        verify(nutrienteMapper).updateEntity(nutriente, request, lote, fornecedor);
+        verify(nutrienteRepository).save(nutriente);
     }
 
     @Test
-    @DisplayName("listarPorLote() deve lançar EntityNotFoundException quando lote não existe")
-    void listarPorLoteDeveLancarEntityNotFoundQuandoLoteNaoExiste() {
-        when(loteRepository.existsById(10L)).thenReturn(false);
+    @DisplayName("Deve deletar nutriente com sucesso")
+    void deveDeletarNutrienteComSucesso() {
+        // Arrange
+        when(nutrienteRepository.findById(1L)).thenReturn(Optional.of(nutriente));
 
-        assertThrows(EntityNotFoundException.class,
-                () -> nutrienteService.listarPorLote(10L));
+        // Act
+        nutrienteService.deletar(1L);
 
-        verify(nutrienteRepository, never()).findByLoteIdOrderByDataAplicacaoAsc(anyLong());
+        // Assert
+        verify(nutrienteRepository).delete(nutriente);
     }
 
     @Test
-    @DisplayName("calcularCustoTotalPorLote() deve retornar total quando existir")
-    void calcularCustoTotalPorLoteDeveRetornarTotal() {
-        when(nutrienteRepository.calcularCustoTotalNutrientesByLoteId(10L))
-                .thenReturn(new BigDecimal("1234.56"));
+    @DisplayName("Deve lançar exceção ao deletar nutriente inexistente")
+    void deveLancarExcecaoAoDeletarNutrienteInexistente() {
+        // Arrange
+        when(nutrienteRepository.findById(999L)).thenReturn(Optional.empty());
 
-        BigDecimal total = nutrienteService.calcularCustoTotalPorLote(10L);
-
-        assertEquals(new BigDecimal("1234.56"), total);
-        verify(nutrienteRepository).calcularCustoTotalNutrientesByLoteId(10L);
-    }
-
-    @Test
-    @DisplayName("calcularCustoTotalPorLote() deve retornar ZERO quando repositório devolver null")
-    void calcularCustoTotalPorLoteDeveRetornarZeroQuandoNulo() {
-        when(nutrienteRepository.calcularCustoTotalNutrientesByLoteId(10L))
-                .thenReturn(null);
-
-        BigDecimal total = nutrienteService.calcularCustoTotalPorLote(10L);
-
-        assertEquals(BigDecimal.ZERO, total);
-        verify(nutrienteRepository).calcularCustoTotalNutrientesByLoteId(10L);
+        // Act & Assert
+        assertThatThrownBy(() -> nutrienteService.deletar(999L))
+                .isInstanceOf(EntityNotFoundException.class);
     }
 }
