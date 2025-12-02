@@ -24,6 +24,18 @@ public class UsuarioController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @GetMapping("/ativos")
+    public ResponseEntity<List<UsuarioResponse>> listarAtivos() {
+        List<UsuarioResponse> response = usuarioService.listarAtivos();
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/email/{email}")
+    public ResponseEntity<UsuarioResponse> buscarPorEmail(@PathVariable String email) {
+        UsuarioResponse response = usuarioService.buscarPorEmail(email);
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<UsuarioResponse> buscarPorId(@PathVariable Long id) {
         UsuarioResponse response = usuarioService.buscarPorId(id);

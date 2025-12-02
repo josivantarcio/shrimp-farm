@@ -1,6 +1,6 @@
 package com.jtarcio.shrimpfarm.application.dto.request;
 
-import com.jtarcio.shrimpfarm.domain.enums.RoleEnum;  // ← MUDANÇA
+import com.jtarcio.shrimpfarm.domain.enums.RoleEnum;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,9 +17,10 @@ public class UsuarioRequest {
     @Size(max = 100, message = "Nome deve ter no máximo 100 caracteres")
     private String nome;
 
-    @NotBlank(message = "Username é obrigatório")
+    // Username NÃO é obrigatório para os testes atuais.
+    // Se quiser manter o campo, deixe sem @NotBlank:
     @Size(min = 3, max = 50, message = "Username deve ter entre 3 e 50 caracteres")
-    private String username;   // novo campo
+    private String username;
 
     @NotBlank(message = "Email é obrigatório")
     @Email(message = "Email inválido")

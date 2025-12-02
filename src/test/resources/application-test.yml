@@ -1,0 +1,64 @@
+spring:
+  application:
+    name: shrimp-farm-test
+
+  # Datasource será sobrescrito pelo Testcontainers dinamicamente
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    # URL, username e password virão do @DynamicPropertySource no BaseIntegrationTest
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 2
+      connection-timeout: 30000
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: validate  # Flyway gerencia o schema, Hibernate apenas valida
+    show-sql: true  # Útil para debug dos testes
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc:
+          batch_size: 20
+        order_inserts: true
+        order_updates: true
+
+  flyway:
+    enabled: true  # IMPORTANTE: Flyway DEVE estar habilitado
+    baseline-on-migrate: true
+    locations: classpath:db/migration
+    baseline-version: 0
+    clean-disabled: false  # Permite limpar o schema nos testes
+
+  # Desabilita console H2 (não será usado)
+  h2:
+    console:
+      enabled: false
+
+  # Segurança desabilitada para testes de integração
+  security:
+    user:
+      name: testuser
+      password: testpass
+
+server:
+  port: 0  # Porta aleatória para evitar conflitos
+  servlet:
+    context-path: /api
+
+logging:
+  level:
+    root: INFO
+    com.jtarcio.shrimpfarm: DEBUG
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    org.testcontainers: INFO
+    com.github.dockerjava: WARN
+    org.flywaydb: DEBUG
+
+# Configurações de teste
+management:
+  endpoints:
+    enabled-by-default: false
