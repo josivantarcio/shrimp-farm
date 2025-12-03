@@ -54,14 +54,15 @@ public class LoteService {
             throw new BusinessException("Data de despesca não pode ser anterior à data de povoamento");
         }
 
+        // Criar lote já como ATIVO
         Lote lote = loteMapper.toEntity(request, viveiro);
+        lote.setStatus(StatusLoteEnum.ATIVO);
+
         Lote loteSalvo = loteRepository.save(lote);
 
-        // Atualizar status do viveiro se o lote for ativo
-        if (loteSalvo.getStatus() == StatusLoteEnum.ATIVO) {
-            viveiro.setStatus(StatusViveiroEnum.OCUPADO);
-            viveiroRepository.save(viveiro);
-        }
+        // Atualizar status do viveiro para OCUPADO
+        viveiro.setStatus(StatusViveiroEnum.OCUPADO);
+        viveiroRepository.save(viveiro);
 
         log.info("Lote criado com sucesso. ID: {}", loteSalvo.getId());
         return loteMapper.toResponse(loteSalvo);

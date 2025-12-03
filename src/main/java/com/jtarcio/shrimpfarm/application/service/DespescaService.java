@@ -38,9 +38,9 @@ public class DespescaService {
         Lote lote = loteRepository.findById(request.getLoteId())
                 .orElseThrow(() -> new EntityNotFoundException("Lote", request.getLoteId()));
 
-        // Validações
+        // Validações: só permite despesca em lote ATIVO
         if (lote.getStatus() != StatusLoteEnum.ATIVO) {
-            throw new BusinessException("Só é possível registrar despesca em lotes ativos");
+            throw new BusinessException("Só é possível registrar despesca em lotes com status ATIVO");
         }
 
         if (lote.getDespesca() != null) {
@@ -58,14 +58,13 @@ public class DespescaService {
         }
 
         Despesca despesca = despescaMapper.toEntity(request, lote, comprador);
+        lote.setStatus(StatusLoteEnum.ATIVO);
 
-        // Calcular taxa de sobrevivência
         BigDecimal taxaSobrevivencia = BigDecimal.valueOf(request.getQuantidadeDespescada())
                 .divide(BigDecimal.valueOf(lote.getQuantidadePosLarvas()), 4, RoundingMode.HALF_UP)
                 .multiply(BigDecimal.valueOf(100));
         despesca.setTaxaSobrevivencia(taxaSobrevivencia);
 
-        // Calcular receita total se houver preço
         if (request.getPrecoVendaKg() != null) {
             BigDecimal receita = request.getPesoTotal().multiply(request.getPrecoVendaKg());
             despesca.setReceitaTotal(receita);
@@ -73,7 +72,6 @@ public class DespescaService {
 
         Despesca despescaSalva = despescaRepository.save(despesca);
 
-        // Atualizar status do lote e viveiro
         lote.setStatus(StatusLoteEnum.FINALIZADO);
         lote.setDataDespesca(request.getDataDespesca());
         lote.getViveiro().setStatus(StatusViveiroEnum.DISPONIVEL);
@@ -84,6 +82,7 @@ public class DespescaService {
 
         return despescaMapper.toResponse(despescaSalva);
     }
+
 
     @Transactional(readOnly = true)
     public DespescaResponse buscarPorId(Long id) {
