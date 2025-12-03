@@ -1,0 +1,1066 @@
+{
+  "info": {
+    "name": "Shrimp Farm API",
+    "_postman_id": "shrimp-farm-collection-v1",
+    "description": "Coleção de testes da Shrimp Farm API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Fazendas",
+      "item": [
+        {
+          "name": "Criar Fazenda",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Fazenda Teste\",\n  \"proprietario\": \"Proprietário Teste\",\n  \"endereco\": \"Estrada X\",\n  \"cidade\": \"Cidade Y\",\n  \"estado\": \"SP\",\n  \"cep\": \"00000-000\",\n  \"areaTotal\": 100.0,\n  \"areaUtil\": 80.0,\n  \"telefone\": \"11999999999\",\n  \"email\": \"fazenda@example.com\",\n  \"observacoes\": \"\",\n  \"ativa\": true\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/fazendas",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "fazendas"]
+            }
+          }
+        },
+        {
+          "name": "Listar Fazendas",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:8080/api/v1/fazendas",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "fazendas"]
+            }
+          }
+        },
+        {
+          "name": "Listar Fazendas Ativas",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:8080/api/v1/fazendas/ativas",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "fazendas", "ativas"]
+            }
+          }
+        },
+        {
+          "name": "Listar Fazendas Paginado",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:8080/api/v1/fazendas/paginado?page=0&size=10",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "fazendas", "paginado"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "10" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Buscar Fazenda por ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:8080/api/v1/fazendas/1",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "fazendas", "1"]
+            }
+          }
+        },
+        {
+          "name": "Atualizar Fazenda",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Fazenda Teste Atualizada\",\n  \"proprietario\": \"Proprietário Teste\",\n  \"endereco\": \"Estrada X\",\n  \"cidade\": \"Cidade Y\",\n  \"estado\": \"SP\",\n  \"cep\": \"00000-000\",\n  \"areaTotal\": 120.0,\n  \"areaUtil\": 90.0,\n  \"telefone\": \"11999999999\",\n  \"email\": \"fazenda@example.com\",\n  \"observacoes\": \"\",\n  \"ativa\": true\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/fazendas/1",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "fazendas", "1"]
+            }
+          }
+        },
+        {
+          "name": "Inativar Fazenda",
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "http://localhost:8080/api/v1/fazendas/1/inativar",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "fazendas", "1", "inativar"]
+            }
+          }
+        },
+        {
+          "name": "Deletar Fazenda",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "http://localhost:8080/api/v1/fazendas/1",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "fazendas", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Viveiros",
+      "item": [
+        {
+          "name": "Criar Viveiro",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fazendaId\": 1,\n  \"codigo\": \"V01\",\n  \"nome\": \"Viveiro 01\",\n  \"area\": 100.0,\n  \"profundidadeMedia\": 1.5,\n  \"volume\": 150.0,\n  \"status\": \"DISPONIVEL\",\n  \"observacoes\": \"\",\n  \"ativo\": true\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/viveiros",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "viveiros"]
+            }
+          }
+        },
+        {
+          "name": "Listar Viveiros",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:8080/api/v1/viveiros",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "viveiros"]
+            }
+          }
+        },
+        {
+          "name": "Listar Viveiros por Fazenda",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:8080/api/v1/viveiros/fazenda/1",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "viveiros", "fazenda", "1"]
+            }
+          }
+        },
+        {
+          "name": "Listar Viveiros Paginado",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:8080/api/v1/viveiros/paginado?page=0&size=10",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "viveiros", "paginado"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "10" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Buscar Viveiro por ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:8080/api/v1/viveiros/1",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "viveiros", "1"]
+            }
+          }
+        },
+        {
+          "name": "Atualizar Viveiro",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fazendaId\": 1,\n  \"codigo\": \"V01\",\n  \"nome\": \"Viveiro 01 Atualizado\",\n  \"area\": 120.0,\n  \"profundidadeMedia\": 1.8,\n  \"volume\": 216.0,\n  \"status\": \"DISPONIVEL\",\n  \"observacoes\": \"\",\n  \"ativo\": true\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/viveiros/1",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "viveiros", "1"]
+            }
+          }
+        },
+        {
+          "name": "Inativar Viveiro",
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "http://localhost:8080/api/v1/viveiros/1/inativar",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "viveiros", "1", "inativar"]
+            }
+          }
+        },
+        {
+          "name": "Deletar Viveiro",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "http://localhost:8080/api/v1/viveiros/1",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "viveiros", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Lotes",
+      "item": [
+        {
+          "name": "Criar Lote",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"viveiroId\": 1,\n  \"codigo\": \"LOTE01_2025\",\n  \"dataPovoamento\": \"2025-01-01\",\n  \"quantidadePosLarvas\": 180000,\n  \"custoPosLarvas\": 1000.0,\n  \"densidadeInicial\": 50.0,\n  \"status\": \"PLANEJADO\",\n  \"observacoes\": \"\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/lotes",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "lotes"]
+            }
+          }
+        },
+        {
+          "name": "Listar Lotes",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:8080/api/v1/lotes",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "lotes"]
+            }
+          }
+        },
+        {
+          "name": "Listar Lotes Ativos",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:8080/api/v1/lotes/ativos",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "lotes", "ativos"]
+            }
+          }
+        },
+        {
+          "name": "Listar Lotes por Viveiro",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:8080/api/v1/lotes/viveiro/1",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "lotes", "viveiro", "1"]
+            }
+          }
+        },
+        {
+          "name": "Listar Lotes Paginado",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:8080/api/v1/lotes/paginado?page=0&size=10",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "lotes", "paginado"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "10" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Buscar Lote por ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:8080/api/v1/lotes/1",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "lotes", "1"]
+            }
+          }
+        },
+        {
+          "name": "Atualizar Lote",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"viveiroId\": 1,\n  \"codigo\": \"LOTE01_2025\",\n  \"dataPovoamento\": \"2025-01-01\",\n  \"dataDespesca\": \"2025-03-01\",\n  \"quantidadePosLarvas\": 180000,\n  \"custoPosLarvas\": 1100.0,\n  \"densidadeInicial\": 55.0,\n  \"status\": \"EM_PRODUCAO\",\n  \"observacoes\": \"\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/lotes/1",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "lotes", "1"]
+            }
+          }
+        },
+        {
+          "name": "Deletar Lote",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "http://localhost:8080/api/v1/lotes/1",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "lotes", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Biometrias",
+      "item": [
+        {
+          "name": "Criar Biometria",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"loteId\": 1,\n  \"dataBiometria\": \"2025-02-15\",\n  \"pesoMedio\": 12.5,\n  \"quantidadeAmostrada\": 100,\n  \"pesoTotalAmostra\": 1.25,\n  \"observacoes\": \"\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/biometrias",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "biometrias"]
+            }
+          }
+        },
+        {
+          "name": "Listar Biometrias por Lote",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:8080/api/v1/biometrias/lote/1",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "biometrias", "lote", "1"]
+            }
+          }
+        },
+        {
+          "name": "Buscar Última Biometria do Lote",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:8080/api/v1/biometrias/lote/1/ultima",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "biometrias", "lote", "1", "ultima"]
+            }
+          }
+        },
+        {
+          "name": "Listar Biometrias Paginado",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:8080/api/v1/biometrias?page=0&size=10",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "biometrias"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "10" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Buscar Biometria por ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:8080/api/v1/biometrias/1",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "biometrias", "1"]
+            }
+          }
+        },
+        {
+          "name": "Atualizar Biometria",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"loteId\": 1,\n  \"dataBiometria\": \"2025-02-20\",\n  \"pesoMedio\": 13.0,\n  \"quantidadeAmostrada\": 120,\n  \"pesoTotalAmostra\": 1.56,\n  \"observacoes\": \"\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/biometrias/1",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "biometrias", "1"]
+            }
+          }
+        },
+        {
+          "name": "Deletar Biometria",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "http://localhost:8080/api/v1/biometrias/1",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "biometrias", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Rações",
+      "item": [
+        {
+          "name": "Registrar Ração",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"loteId\": 1,\n  \"fornecedorId\": 1,\n  \"dataAplicacao\": \"2025-02-15\",\n  \"tipoRacao\": \"INICIAL\",\n  \"marca\": \"Marca X\",\n  \"quantidade\": 20.0,\n  \"unidade\": \"KG\",\n  \"custoUnitario\": 7.50,\n  \"proteinaPercentual\": 35.0,\n  \"observacoes\": \"\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/racoes",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "racoes"]
+            }
+          }
+        },
+        {
+          "name": "Listar Rações por Lote",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:8080/api/v1/racoes/lote/1",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "racoes", "lote", "1"]
+            }
+          }
+        },
+        {
+          "name": "Total de Ração por Lote",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:8080/api/v1/racoes/lote/1/total",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "racoes", "lote", "1", "total"]
+            }
+          }
+        },
+        {
+          "name": "Listar Rações Paginado",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:8080/api/v1/racoes?page=0&size=10",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "racoes"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "10" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Buscar Ração por ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:8080/api/v1/racoes/1",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "racoes", "1"]
+            }
+          }
+        },
+        {
+          "name": "Atualizar Ração",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"loteId\": 1,\n  \"fornecedorId\": 1,\n  \"dataAplicacao\": \"2025-02-16\",\n  \"tipoRacao\": \"CRESCIMENTO\",\n  \"marca\": \"Marca X\",\n  \"quantidade\": 22.0,\n  \"unidade\": \"KG\",\n  \"custoUnitario\": 7.50,\n  \"proteinaPercentual\": 35.0,\n  \"observacoes\": \"\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/racoes/1",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "racoes", "1"]
+            }
+          }
+        },
+        {
+          "name": "Deletar Ração",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "http://localhost:8080/api/v1/racoes/1",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "racoes", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Despescas",
+      "item": [
+        {
+          "name": "Registrar Despesca",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"loteId\": 1,\n  \"compradorId\": 1,\n  \"dataDespesca\": \"2025-04-01\",\n  \"pesoTotal\": 1928.5,\n  \"quantidadeDespescada\": 101500,\n  \"pesoMedioFinal\": 1.25,\n  \"precoVendaKg\": 18.0,\n  \"custoDespesca\": 500.0,\n  \"observacoes\": \"\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/despescas",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "despescas"]
+            }
+          }
+        },
+        {
+          "name": "Buscar Despesca por ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:8080/api/v1/despescas/1",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "despescas", "1"]
+            }
+          }
+        },
+        {
+          "name": "Buscar Despesca por Lote",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:8080/api/v1/despescas/lote/1",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "despescas", "lote", "1"]
+            }
+          }
+        },
+        {
+          "name": "Atualizar Despesca",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"loteId\": 1,\n  \"compradorId\": 1,\n  \"dataDespesca\": \"2025-04-02\",\n  \"pesoTotal\": 2000.0,\n  \"quantidadeDespescada\": 102000,\n  \"pesoMedioFinal\": 1.30,\n  \"precoVendaKg\": 19.0,\n  \"custoDespesca\": 550.0,\n  \"observacoes\": \"\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/despescas/1",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "despescas", "1"]
+            }
+          }
+        },
+        {
+          "name": "Deletar Despesca",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "http://localhost:8080/api/v1/despescas/1",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "despescas", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Usuários",
+      "item": [
+        {
+          "name": "Criar Usuário",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Admin\",\n  \"username\": \"admin\",\n  \"email\": \"admin@example.com\",\n  \"senha\": \"123456\",\n  \"papel\": \"ADMIN\",\n  \"ativo\": true\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/usuarios",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "usuarios"]
+            }
+          }
+        },
+        {
+          "name": "Listar Usuários",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:8080/api/v1/usuarios",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "usuarios"]
+            }
+          }
+        },
+        {
+          "name": "Listar Usuários Ativos",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:8080/api/v1/usuarios/ativos",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "usuarios", "ativos"]
+            }
+          }
+        },
+        {
+          "name": "Buscar Usuário por ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:8080/api/v1/usuarios/1",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "usuarios", "1"]
+            }
+          }
+        },
+        {
+          "name": "Buscar Usuário por Email",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:8080/api/v1/usuarios/email/admin@example.com",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "usuarios", "email", "admin@example.com"]
+            }
+          }
+        },
+        {
+          "name": "Atualizar Usuário",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Admin Atualizado\",\n  \"username\": \"admin\",\n  \"email\": \"admin@example.com\",\n  \"senha\": \"123456\",\n  \"papel\": \"ADMIN\",\n  \"ativo\": true\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/usuarios/1",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "usuarios", "1"]
+            }
+          }
+        },
+        {
+          "name": "Inativar Usuário",
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "http://localhost:8080/api/v1/usuarios/1/inativar",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "usuarios", "1", "inativar"]
+            }
+          }
+        },
+        {
+          "name": "Deletar Usuário",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "http://localhost:8080/api/v1/usuarios/1",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "usuarios", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Fornecedores",
+      "item": [
+        {
+          "name": "Criar Fornecedor",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Fornecedor 1\",\n  \"cnpj\": \"12345678000199\",\n  \"telefone\": \"11999999999\",\n  \"email\": \"fornecedor1@example.com\",\n  \"endereco\": \"Rua X\",\n  \"cidade\": \"Cidade Y\",\n  \"estado\": \"SP\",\n  \"cep\": \"00000-000\",\n  \"contato\": \"João\",\n  \"observacoes\": \"\",\n  \"ativo\": true\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/fornecedores",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "fornecedores"]
+            }
+          }
+        },
+        {
+          "name": "Listar Fornecedores",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:8080/api/v1/fornecedores",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "fornecedores"]
+            }
+          }
+        },
+        {
+          "name": "Listar Fornecedores Ativos",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:8080/api/v1/fornecedores/ativos",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "fornecedores", "ativos"]
+            }
+          }
+        },
+        {
+          "name": "Listar Fornecedores Paginado",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:8080/api/v1/fornecedores/paginado?page=0&size=10",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "fornecedores", "paginado"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "10" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Buscar Fornecedor por ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:8080/api/v1/fornecedores/1",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "fornecedores", "1"]
+            }
+          }
+        },
+        {
+          "name": "Atualizar Fornecedor",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Fornecedor 1 Atualizado\",\n  \"cnpj\": \"12345678000199\",\n  \"telefone\": \"11999999999\",\n  \"email\": \"fornecedor1@example.com\",\n  \"endereco\": \"Rua X\",\n  \"cidade\": \"Cidade Y\",\n  \"estado\": \"SP\",\n  \"cep\": \"00000-000\",\n  \"contato\": \"João\",\n  \"observacoes\": \"\",\n  \"ativo\": true\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/fornecedores/1",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "fornecedores", "1"]
+            }
+          }
+        },
+        {
+          "name": "Inativar Fornecedor",
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "http://localhost:8080/api/v1/fornecedores/1/inativar",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "fornecedores", "1", "inativar"]
+            }
+          }
+        },
+        {
+          "name": "Deletar Fornecedor",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "http://localhost:8080/api/v1/fornecedores/1",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "fornecedores", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Compradores",
+      "item": [
+        {
+          "name": "Criar Comprador",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Comprador 1\",\n  \"cnpj\": \"12345678901\",\n  \"contato\": \"Contato 1\",\n  \"endereco\": \"Endereço 1\",\n  \"ativo\": true\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/compradores",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "compradores"]
+            }
+          }
+        },
+        {
+          "name": "Listar Compradores",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:8080/api/v1/compradores",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "compradores"]
+            }
+          }
+        },
+        {
+          "name": "Listar Compradores Ativos",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:8080/api/v1/compradores/ativos",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "compradores", "ativos"]
+            }
+          }
+        },
+        {
+          "name": "Listar Compradores Paginado",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:8080/api/v1/compradores/paginado?page=0&size=10",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "compradores", "paginado"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "10" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Buscar Comprador por ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:8080/api/v1/compradores/1",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "compradores", "1"]
+            }
+          }
+        },
+        {
+          "name": "Atualizar Comprador",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Comprador 1 Atualizado\",\n  \"cnpj\": \"12345678901\",\n  \"contato\": \"Contato 1\",\n  \"endereco\": \"Endereço 1\",\n  \"ativo\": true\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/compradores/1",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "compradores", "1"]
+            }
+          }
+        },
+        {
+          "name": "Inativar Comprador",
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "http://localhost:8080/api/v1/compradores/1/inativar",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "compradores", "1", "inativar"]
+            }
+          }
+        },
+        {
+          "name": "Deletar Comprador",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "http://localhost:8080/api/v1/compradores/1",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "compradores", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Dashboard & Relatórios",
+      "item": [
+        {
+          "name": "Dashboard KPIs (DashboardController)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:8080/api/v1/dashboard/kpis",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "dashboard", "kpis"]
+            }
+          }
+        },
+        {
+          "name": "Dashboard KPIs (via RelatorioController)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:8080/api/v1/relatorios/dashboard",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "relatorios", "dashboard"]
+            }
+          }
+        },
+        {
+          "name": "Relatório Custo por Lote",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:8080/api/v1/relatorios/lotes/1/custos",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "relatorios", "lotes", "1", "custos"]
+            }
+          }
+        },
+        {
+          "name": "Relatórios Lotes Ativos (Custos)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:8080/api/v1/relatorios/lotes/ativos/custos",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "relatorios", "lotes", "ativos", "custos"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
