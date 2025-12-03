@@ -1,7 +1,10 @@
 package com.jtarcio.shrimpfarm.application.dto.request;
 
 import com.jtarcio.shrimpfarm.domain.enums.RoleEnum;
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,13 +15,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class UsuarioRequest {
-
     @NotBlank(message = "Nome é obrigatório")
     @Size(max = 100, message = "Nome deve ter no máximo 100 caracteres")
     private String nome;
 
-    // Username NÃO é obrigatório para os testes atuais.
-    // Se quiser manter o campo, deixe sem @NotBlank:
+    // Username é opcional. Se quiser torná-lo obrigatório, adicione @NotBlank.
     @Size(min = 3, max = 50, message = "Username deve ter entre 3 e 50 caracteres")
     private String username;
 
@@ -31,9 +32,10 @@ public class UsuarioRequest {
     @Size(min = 6, message = "Senha deve ter no mínimo 6 caracteres")
     private String senha;
 
-    @NotNull(message = "Role do usuário é obrigatório")
+    @NotNull(message = "Papel do usuário é obrigatório")
     private RoleEnum papel;
 
     @Builder.Default
     private Boolean ativo = true;
+
 }

@@ -32,7 +32,7 @@ public class FornecedorRequest {
     @Size(max = 100, message = "Cidade deve ter no máximo 100 caracteres")
     private String cidade;
 
-    @Size(max = 2, message = "Estado deve ter 2 caracteres")
+    @Size(min = 2, max = 2, message = "Estado deve ter exatamente 2 caracteres")
     private String estado;
 
     @Size(max = 10, message = "CEP deve ter no máximo 10 caracteres")

@@ -38,13 +38,14 @@ public class DespescaRequest {
     @Digits(integer = 8, fraction = 3, message = "Peso médio final inválido")
     private BigDecimal pesoMedioFinal;
 
-    @DecimalMin(value = "0.0", message = "Preço de venda deve ser positivo")
+    @DecimalMin(value = "0.0", inclusive = false, message = "Preço de venda deve ser positivo")
     @Digits(integer = 10, fraction = 2, message = "Preço de venda inválido")
     private BigDecimal precoVendaKg;
 
-    @DecimalMin(value = "0.0", message = "Custo de despesca deve ser positivo")
+    @DecimalMin(value = "0.0", inclusive = false, message = "Custo de despesca deve ser positivo")
     @Digits(integer = 10, fraction = 2, message = "Custo de despesca inválido")
     private BigDecimal custoDespesca;
 
     private String observacoes;
+
 }

@@ -31,7 +31,7 @@ public class CustoVariavelRequest {
     private String descricao;
 
     @NotNull(message = "Valor é obrigatório")
-    @DecimalMin(value = "0.0", message = "Valor deve ser positivo")
+    @DecimalMin(value = "0.0", inclusive = false, message = "Valor deve ser positivo")
     @Digits(integer = 12, fraction = 2, message = "Valor inválido")
     private BigDecimal valor;
 

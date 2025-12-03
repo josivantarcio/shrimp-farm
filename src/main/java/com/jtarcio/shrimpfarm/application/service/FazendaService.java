@@ -13,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,6 +28,8 @@ public class FazendaService {
     @Transactional
     public FazendaResponse criar(FazendaRequest request) {
         log.info("Criando nova fazenda: {}", request.getNome());
+
+        validarAreas(request.getAreaTotal(), request.getAreaUtil());
 
         Fazenda fazenda = fazendaMapper.toEntity(request);
         Fazenda fazendaSalva = fazendaRepository.save(fazenda);
@@ -76,6 +79,8 @@ public class FazendaService {
     public FazendaResponse atualizar(Long id, FazendaRequest request) {
         log.info("Atualizando fazenda ID: {}", id);
 
+        validarAreas(request.getAreaTotal(), request.getAreaUtil());
+
         Fazenda fazenda = fazendaRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Fazenda", id));
 
@@ -122,4 +127,11 @@ public class FazendaService {
 
         log.info("Fazenda ativada com sucesso. ID: {}", id);
     }
+
+    private void validarAreas(BigDecimal areaTotal, BigDecimal areaUtil) {
+        if (areaTotal != null && areaUtil != null && areaUtil.compareTo(areaTotal) > 0) {
+            throw new IllegalArgumentException("Área útil não pode ser maior que a área total");
+        }
+    }
+
 }

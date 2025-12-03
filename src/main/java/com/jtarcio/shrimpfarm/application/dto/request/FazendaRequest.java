@@ -27,7 +27,8 @@ public class FazendaRequest {
     @Size(max = 100, message = "Cidade deve ter no máximo 100 caracteres")
     private String cidade;
 
-    @Size(min = 2, max = 2, message = "Estado deve ter 2 caracteres (UF)")
+    // Garante exatamente 2 letras (UF), ex: SP, BA
+    @Pattern(regexp = "^[A-Z]{2}$", message = "Estado (UF) deve ter exatamente 2 letras maiúsculas")
     private String estado;
 
     @Pattern(regexp = "\\d{5}-?\\d{3}", message = "CEP inválido")
@@ -52,4 +53,5 @@ public class FazendaRequest {
 
     @Builder.Default
     private Boolean ativa = true;
+
 }

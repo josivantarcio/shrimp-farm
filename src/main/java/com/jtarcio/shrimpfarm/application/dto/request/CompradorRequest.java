@@ -16,6 +16,7 @@ public class CompradorRequest {
     @Size(max = 100, message = "Nome deve ter no máximo 100 caracteres")
     private String nome;
 
+    // Aceita CPF (11) ou CNPJ (14). Se quiser, depois validamos formato com @Pattern.
     @NotBlank(message = "CNPJ/CPF é obrigatório")
     @Size(min = 11, max = 14, message = "CNPJ/CPF deve ter entre 11 e 14 caracteres")
     private String cnpj;
@@ -28,4 +29,5 @@ public class CompradorRequest {
 
     @Builder.Default
     private Boolean ativo = true;
+
 }

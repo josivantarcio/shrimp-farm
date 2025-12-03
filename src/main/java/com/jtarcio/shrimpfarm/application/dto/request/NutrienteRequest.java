@@ -41,7 +41,7 @@ public class NutrienteRequest {
     @NotNull(message = "Unidade é obrigatória")
     private UnidadeMedidaEnum unidade;
 
-    @DecimalMin(value = "0.0", message = "Custo unitário deve ser positivo")
+    @DecimalMin(value = "0.0", inclusive = false, message = "Custo unitário deve ser positivo")
     @Digits(integer = 10, fraction = 2, message = "Custo unitário inválido")
     private BigDecimal custoUnitario;
 
